@@ -6,7 +6,6 @@ use Composer\IO\ConsoleIO;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Helper\HelperSet;
-use Symfony\Component\Console\Helper\DialogHelper;
 
 abstract class AbstractConfigFileTest extends \PHPUnit_Framework_TestCase
 {
