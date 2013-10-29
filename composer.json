@@ -1,0 +1,21 @@
+{
+    "name": "wemakecustom/composer-script-utils",
+    "description": "Set of tools for Composer scripts",
+    "type": "library",
+    "keywords": ["composer"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sébastien Lavoie",
+            "email": "seb@wemakecustom.com"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*",
+        "composer/composer": "dev-master"
+    },
+    "autoload": {
+        "psr-0": { "WMC\\Composer\\Utils\\": "" }
+    },
+    "target-dir": "WMC/Composer/Utils"
+}
