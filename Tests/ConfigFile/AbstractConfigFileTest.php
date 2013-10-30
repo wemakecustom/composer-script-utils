@@ -22,12 +22,6 @@ abstract class AbstractConfigFileTest extends \PHPUnit_Framework_TestCase
 
     abstract protected function getConfigFile(ConsoleIO $io);
 
-    public function test()
-    {
-        // $this->iniConfigFile->updateFile(__DIR__ . '/samples/test.ini', __DIR__ . '/samples/test.ini.dist');
-        // $this->assertTrue(true);
-    }
-
     protected function getDialogHelper()
     {
         // We mock a DialogHelper that always return the default value
