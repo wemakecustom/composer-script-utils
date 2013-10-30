@@ -3,6 +3,8 @@ Composer Script Utils
 
 Set of tools for Composer scripts
 
+[![Build Status](https://travis-ci.org/wemakecustom/composer-script-utils.png)](https://travis-ci.org/wemakecustom/composer-script-utils)
+
 ## Documentation
 
 ### PackageLocator::getPackagePath
