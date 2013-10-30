@@ -77,3 +77,7 @@ class ScriptHandler
 ## Author
 
  * [Sébastien Lavoie](http://www.wemakecustom.com)
+
+## Notes
+
+Should work with PHP 5.3 but tests require 5.4 +
