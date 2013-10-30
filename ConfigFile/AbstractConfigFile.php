@@ -51,7 +51,9 @@ abstract class AbstractConfigFile
         if ($exists) {
             $existingValues = $this->parseFile($realFile);
             if (!is_array($existingValues)) {
+                // @codeCoverageIgnoreStart
                 throw new \InvalidArgumentException(sprintf('The existing "%s" file does not contain an array', $realFile));
+                // @codeCoverageIgnoreEnd
             }
             $actualValues = array_merge($actualValues, $existingValues);
         }
@@ -158,7 +160,9 @@ abstract class AbstractConfigFile
     {
         // Simply use the expectedParams value as default for the missing params.
         if (!$this->io->isInteractive()) {
+            // @codeCoverageIgnoreStart
             return array_replace($expectedParams, $actualParams);
+            // @codeCoverageIgnoreEnd
         }
 
         $isStarted = false;
@@ -219,15 +223,13 @@ abstract class AbstractConfigFile
     /**
      * Parse a single value
      * Used for command-line input
+     * Uses ini format by default
      *
      * @param  string $value
      * @return mixed
      */
     protected function parseSingle($value)
     {
-        $ini = parse_ini_string("value=$value", false, INI_SCANNER_RAW);
-        $value = $ini['value'];
-
         switch ($value) {
             case 'false': return false;
             case 'true': return true;
@@ -241,7 +243,23 @@ abstract class AbstractConfigFile
                     return (double) $value;
                 }
 
-                return $value;
+                return self::unquote($value);
         }
+    }
+
+    protected static function unquote($string)
+    {
+        if (strlen($string) == 0) {
+            return $string;
+        }
+
+        $quote = $string[0];
+
+        if ($quote == '"' || $quote == "'") {
+            $string = substr($string, 1, -1);
+            return stripslashes($string);
+        }
+
+        return $string;
     }
 }

@@ -49,7 +49,39 @@ abstract class AbstractConfigFileTest extends \PHPUnit_Framework_TestCase
             'type_null'    => null,
             'type_integer' => 123,
             'type_float'   => 12.3,
+            'type_empty'   => '',
         );
+    }
+
+    public function testInvalidFile()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        $this->configFile->updateFile(null, '/tmp/adahsdkajhsdk');
+    }
+
+    public function testKeepOutdatedParams()
+    {
+        $dump = static::getMethod($this->configFile, "dump");
+        $parse = static::getMethod($this->configFile, "parseFile");
+        $tempFile = tempnam(null, 'composer_script_utils_tests');
+        $tempDistFile = tempnam(null, 'composer_script_utils_tests');
+
+        $data = $this->getTestData();
+        $dist = array_slice($data, 0, 2);
+
+        file_put_contents($tempFile, $dump($data));
+        file_put_contents($tempDistFile, $dump($dist));
+
+        $this->configFile->setKeepOutdatedParams(true);
+        $this->configFile->updateFile($tempFile, $tempDistFile);
+        $this->assertEquals($data, $parse($tempFile));
+
+        $this->configFile->setKeepOutdatedParams(false);
+        $this->configFile->updateFile($tempFile, $tempDistFile);
+        $this->assertEquals($dist, $parse($tempFile));
+
+        unlink($tempFile);
+        unlink($tempDistFile);
     }
 
     public function testDumpParseSingle()

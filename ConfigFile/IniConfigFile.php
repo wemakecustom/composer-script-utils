@@ -17,7 +17,7 @@ class IniConfigFile extends AbstractConfigFile
 
     protected function parseFile($file)
     {
-        $ini = parse_ini_file($file, false, INI_SCANNER_RAW);
+        $ini = @parse_ini_file($file, false, INI_SCANNER_RAW);
 
         foreach ($ini as $key => $value) {
             $ini[$key] = $this->parseSingle($value);
