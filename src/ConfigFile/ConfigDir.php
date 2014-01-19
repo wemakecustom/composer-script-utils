@@ -22,6 +22,7 @@ class ConfigDir
         $this->io = $io;
 
         $this->loadParser('ini', 'WMC\Composer\Utils\ConfigFile\IniConfigFile');
+        $this->loadParser('json', 'WMC\Composer\Utils\ConfigFile\JsonConfigFile');
     }
 
     public function loadParser($extension, $parserClass)
