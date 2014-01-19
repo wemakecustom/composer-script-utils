@@ -7,7 +7,7 @@ use Composer\Composer;
 class PackageLocator
 {
     /**
-     * Return the full instal path of a package
+     * Return the full install path of a package
      *
      * @param  Composer $composer
      * @param  string $packageName
@@ -24,5 +24,16 @@ class PackageLocator
                 return $install_mgr->getInstallPath($package);
             }
         }
+    }
+
+    /**
+     * Return the base project path
+     *
+     * @param  Composer $composer
+     * @return string install path
+     */
+    public static function getBasePath(Composer $composer)
+    {
+        return getcwd(); // At the moment, I do not know any better way.
     }
 }

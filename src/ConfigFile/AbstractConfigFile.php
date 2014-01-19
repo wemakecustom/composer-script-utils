@@ -178,7 +178,7 @@ abstract class AbstractConfigFile
             }
 
             $default = $this->dumpSingle($message);
-            $value = $this->io->ask(sprintf('<question>%s</question> (<comment>%s</comment>):', $key, $default), $default);
+            $value = $this->io->ask(sprintf('<question>%s</question> (<comment>%s</comment>): ', $key, $default), $default);
 
             $actualParams[$key] = $this->parseSingle($value);
         }

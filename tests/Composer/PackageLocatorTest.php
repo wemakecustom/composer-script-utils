@@ -27,4 +27,9 @@ class PackageLocatorTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEmpty(PackageLocator::getPackagePath($this->composer, 'composer/composer'));
         $this->assertNull(PackageLocator::getPackagePath($this->composer, 'asjhkjsdhfs/sdkfjhskfjs'));
     }
+
+    public function testBasePath()
+    {
+        $this->assertEquals(PackageLocator::getBasePath($this->composer), dirname(dirname(__DIR__)));
+    }
 }
