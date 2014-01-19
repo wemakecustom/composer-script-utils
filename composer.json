@@ -17,6 +17,9 @@
     "require-dev": {
         "composer/composer": "dev-master"
     },
+    "suggest": {
+        "symfony/yaml": "Enables yaml parsing"
+    },
     "scripts": {
         "post-install-cmd": [
             "WMC\\Composer\\Utils\\ConfigFile\\ConfigDir::updateDirs"

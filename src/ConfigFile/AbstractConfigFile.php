@@ -31,6 +31,11 @@ abstract class AbstractConfigFile
         $this->io = $io;
     }
 
+    public static function isSupported()
+    {
+        return true;
+    }
+
     public function updateFile($realFile, $distFile)
     {
         if (!is_file($distFile)) {

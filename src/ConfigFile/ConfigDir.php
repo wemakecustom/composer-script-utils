@@ -23,11 +23,15 @@ class ConfigDir
 
         $this->loadParser('ini', 'WMC\Composer\Utils\ConfigFile\IniConfigFile');
         $this->loadParser('json', 'WMC\Composer\Utils\ConfigFile\JsonConfigFile');
+        $this->loadParser('yml', 'WMC\Composer\Utils\ConfigFile\YamlConfigFile');
+        $this->loadParser('yaml', 'WMC\Composer\Utils\ConfigFile\YamlConfigFile');
     }
 
     public function loadParser($extension, $parserClass)
     {
-        $this->parsers[$extension] = new $parserClass($this->io);
+        if ($parserClass::isSupported()) {
+            $this->parsers[$extension] = new $parserClass($this->io);
+        }
     }
 
     private function listFiles($dir)
