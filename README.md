@@ -58,6 +58,12 @@ You can override this by specifying a custom environment map using `setEnvMap(ar
 By default, it will flush outdated parameters (present in the config file, but not in the dist file).
 You can override this with `setKeepOutdatedParams`.
 
+#### Supported formats
+
+Currently, json, ini, yml and yaml files are supported.
+
+For command-line input, json_decode will be used, but strings do not need to be quoted.
+
 #### Default Composer script
 
 If you want to use the default configuration without any custom mapping, you can use the included Composer script:

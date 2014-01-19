@@ -214,15 +214,7 @@ abstract class AbstractConfigFile
      */
     protected function dumpSingle($value)
     {
-        if (is_bool($value)) {
-            return $value ? 'true' : 'false';
-        } elseif (null === $value) {
-            return 'null';
-        } elseif (is_numeric($value)) {
-            return $value;
-        } else {
-            return "\"$value\"";
-        }
+        return json_encode($value);
     }
 
     /**
@@ -235,36 +227,12 @@ abstract class AbstractConfigFile
      */
     protected function parseSingle($value)
     {
-        switch ($value) {
-            case 'false': return false;
-            case 'true': return true;
-            case 'null': return null;
+        $converted = json_decode($value, true);
 
-            default:
-                if (("" . (int) $value) === $value) {
-                    return (int) $value;
-                }
-                if (("" . (double) $value) === $value) {
-                    return (double) $value;
-                }
-
-                return self::unquote($value);
-        }
-    }
-
-    protected static function unquote($string)
-    {
-        if (strlen($string) == 0) {
-            return $string;
+        if ($converted === null && strlen($value) > 0 && $value !== 'null') {
+            $converted = "" . $value; // impossible to convert, use as string
         }
 
-        $quote = $string[0];
-
-        if ($quote == '"' || $quote == "'") {
-            $string = substr($string, 1, -1);
-            return stripslashes($string);
-        }
-
-        return $string;
+        return $converted;
     }
 }
