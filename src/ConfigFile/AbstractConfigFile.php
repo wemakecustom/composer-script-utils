@@ -159,9 +159,11 @@ abstract class AbstractConfigFile
      *
      * @param  array $expectedParams
      * @param  array $actualParams
+     * @param  string $prefix Prefix for questions. For associative arrays, it will contain all the previous levels, separated by a dot.
+     * @param  boolean $isStarted Shared state if the header was already outputed
      * @return array
      */
-    protected function getParams(array $expectedParams, array $actualParams)
+    protected function getParams(array $expectedParams, array $actualParams, $prefix = '', &$isStarted = false)
     {
         // Simply use the expectedParams value as default for the missing params.
         if (!$this->io->isInteractive()) {
@@ -170,9 +172,14 @@ abstract class AbstractConfigFile
             // @codeCoverageIgnoreEnd
         }
 
-        $isStarted = false;
-
         foreach ($expectedParams as $key => $message) {
+            if (is_array($message)) {
+                $actual = (isset($actualParams[$key]) && is_array($actualParams[$key])) ? $actualParams[$key] : array();
+                $actualParams[$key] = $this->getParams($message, $actual, "$prefix$key.", $isStarted);
+
+                continue;
+            }
+
             if (array_key_exists($key, $actualParams)) {
                 continue;
             }
@@ -183,7 +190,7 @@ abstract class AbstractConfigFile
             }
 
             $default = $this->dumpSingle($message);
-            $value = $this->io->ask(sprintf('<question>%s</question> (<comment>%s</comment>): ', $key, $default), $default);
+            $value = $this->io->ask(sprintf('<question>%s</question> (<comment>%s</comment>): ', "$prefix$key", $default), $default);
 
             $actualParams[$key] = $this->parseSingle($value);
         }

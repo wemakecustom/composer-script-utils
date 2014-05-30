@@ -44,6 +44,7 @@ abstract class AbstractConfigFileTest extends \PHPUnit_Framework_TestCase
             'type_integer' => 123,
             'type_float'   => 12.3,
             'type_empty'   => '',
+            'type_array'   => array('foo' => 'bar', 'baz' => 'qux'),
         );
     }
 
@@ -99,6 +100,29 @@ abstract class AbstractConfigFileTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->getTestData(), $parse($tempFile));
 
         unlink($tempFile);
+    }
+
+    public function testRecursive()
+    {
+        $getParams = static::getMethod($this->configFile, "getParams");
+
+        $actual = array(
+            'array' => array(
+                'foo' => 'bar',
+            ),
+        );
+
+        $expected = array(
+            'array' => array(
+                'foo' => 'qux',
+                'bar' => 'baz',
+            ),
+        );
+
+        $return = $getParams($expected, $actual);
+
+        $this->assertEquals($return['array']['foo'], $actual['array']['foo']);
+        $this->assertEquals($return['array']['bar'], $expected['array']['bar']);
     }
 
     public function testEnvMap()
