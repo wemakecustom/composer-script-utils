@@ -8,7 +8,7 @@ class YamlConfigFile extends AbstractConfigFile
 {
     protected function dump(array $params)
     {
-        return Yaml::dump($params);
+        return Yaml::dump($params, 3);
     }
 
     protected function parseFile($file)
