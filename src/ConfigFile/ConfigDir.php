@@ -52,6 +52,7 @@ class ConfigDir
     {
         $info = pathinfo($distFile);
         $targetFile = $targetDir . '/' . $info['basename'];
+        $this->parsers[$info['extension']]->setName(null); // allow name detection
         $this->parsers[$info['extension']]->updateFile($targetFile, $distFile);
     }
 
