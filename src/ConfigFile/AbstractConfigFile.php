@@ -77,6 +77,12 @@ abstract class AbstractConfigFile
         $contents = $this->dump($actualValues);
 
         if (!$exists || $this->dump($existingValues) != $contents) {
+            $directory = dirname($realFile);
+            if (!is_dir($directory)) {
+                $this->io->write(sprintf('<info>Creating "%s" directory</info>', $directory));
+                mkdir($directory, 0777, true);
+            }
+
             $this->io->write(sprintf('<info>%s "%s"</info>', $exists ? 'Updating' : 'Creating', $realFile));
             file_put_contents($realFile, $contents);
         }
