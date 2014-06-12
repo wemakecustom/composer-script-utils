@@ -16,17 +16,25 @@ use WMC\Composer\Utils\ConfigFile\IniConfigFile;
 class ConfigDirTest extends \PHPUnit_Framework_TestCase
 {
     private $event;
+
     private $tmpDir;
+
+    private $distDir;
+
+    private $localDir;
 
     public function setUp()
     {
         $this->tmpDir = self::getTempDir();
+        $this->distDir = $this->tmpDir . '/dist';
+        $this->localDir = $this->tmpDir . '/local';
+        mkdir($this->distDir);
 
         $composer = new Composer;
         $package = new RootPackage('test/test', '1.0', 'v1.0');
         $package->setExtra(array(
             'update-config-dirs' => array(
-                $this->tmpDir . '/dist' => $this->tmpDir,
+                $this->distDir => $this->localDir,
             ),
         ));
         $composer->setPackage($package);
@@ -44,7 +52,6 @@ class ConfigDirTest extends \PHPUnit_Framework_TestCase
         $tmp = tempnam(null, 'composer-test');
         unlink($tmp);
         mkdir($tmp);
-        mkdir($tmp . '/dist');
 
         return $tmp;
     }
@@ -52,13 +59,13 @@ class ConfigDirTest extends \PHPUnit_Framework_TestCase
     public function testOneFile()
     {
         $dump = self::getMethod($this->configFile, 'dump');
-        file_put_contents("{$this->tmpDir}/dist/one.ini", $dump(array('test' => 'example')));
+        file_put_contents("{$this->distDir}/one.ini", $dump(array('test' => 'example')));
 
         ConfigDir::updateDirs($this->event);
-        $this->assertFileExists("{$this->tmpDir}/one.ini");
+        $this->assertFileExists("{$this->localDir}/one.ini");
 
-        unlink("{$this->tmpDir}/dist/one.ini");
-        unlink("{$this->tmpDir}/one.ini");
+        unlink("{$this->distDir}/one.ini");
+        unlink("{$this->localDir}/one.ini");
     }
 
     protected function getDialogHelper()
@@ -75,7 +82,8 @@ class ConfigDirTest extends \PHPUnit_Framework_TestCase
 
     public function tearDown()
     {
-        rmdir($this->tmpDir . '/dist');
+        rmdir($this->distDir);
+        rmdir($this->localDir);
         rmdir($this->tmpDir);
     }
 
