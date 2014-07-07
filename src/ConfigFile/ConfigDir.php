@@ -25,6 +25,7 @@ class ConfigDir
         $this->loadParser('json', 'WMC\Composer\Utils\ConfigFile\JsonConfigFile');
         $this->loadParser('yml', 'WMC\Composer\Utils\ConfigFile\YamlConfigFile');
         $this->loadParser('yaml', 'WMC\Composer\Utils\ConfigFile\YamlConfigFile');
+        $this->loadParser('php', 'WMC\Composer\Utils\ConfigFile\PhpConfigFile');
     }
 
     public function loadParser($extension, $parserClass)
