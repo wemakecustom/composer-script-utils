@@ -12,6 +12,7 @@ use Symfony\Component\Console\Helper\HelperSet;
 
 use WMC\Composer\Utils\ConfigFile\ConfigDir;
 use WMC\Composer\Utils\ConfigFile\IniConfigFile;
+use WMC\Composer\Utils\ConfigFile\PhpConfigFile;
 
 class ConfigDirTest extends \PHPUnit_Framework_TestCase
 {
@@ -22,6 +23,10 @@ class ConfigDirTest extends \PHPUnit_Framework_TestCase
     private $distDir;
 
     private $localDir;
+
+    private $configFile;
+
+    private $configFilePhp;
 
     public function setUp()
     {
@@ -45,6 +50,7 @@ class ConfigDirTest extends \PHPUnit_Framework_TestCase
 
         $this->event = new Event('test', $composer, $io);
         $this->configFile = new IniConfigFile($io);
+        $this->configFilePhp = new PhpConfigFile($io);
     }
 
     private static function getTempDir()
@@ -58,13 +64,26 @@ class ConfigDirTest extends \PHPUnit_Framework_TestCase
 
     public function testOneFile()
     {
-        $dump = self::getMethod($this->configFile, 'dump');
-        file_put_contents("{$this->distDir}/one.ini", $dump(array('test' => 'example')));
+        file_put_contents("{$this->distDir}/one.ini", $this->configFile->dump(array('test' => 'example')));
 
         ConfigDir::updateDirs($this->event);
         $this->assertFileExists("{$this->localDir}/one.ini");
 
         unlink("{$this->distDir}/one.ini");
+        unlink("{$this->localDir}/one.ini");
+    }
+
+    public function testDifferentFormat()
+    {
+        $testData = array('test' => 'example');
+        file_put_contents("{$this->distDir}/one.ini.php", $this->configFilePhp->dump($testData));
+
+        ConfigDir::updateDirs($this->event);
+        $this->assertFileExists("{$this->localDir}/one.ini");
+        $data = $this->configFile->parseFile("{$this->localDir}/one.ini");
+        $this->assertEquals($data, $testData);
+
+        unlink("{$this->distDir}/one.ini.php");
         unlink("{$this->localDir}/one.ini");
     }
 
@@ -85,14 +104,5 @@ class ConfigDirTest extends \PHPUnit_Framework_TestCase
         rmdir($this->distDir);
         rmdir($this->localDir);
         rmdir($this->tmpDir);
-    }
-
-    protected static function getMethod($obj, $method)
-    {
-        $class = new \ReflectionObject($obj);
-        $method = $class->getMethod($method);
-        $method->setAccessible(true);
-
-        return $method->getClosure($obj);
     }
 }

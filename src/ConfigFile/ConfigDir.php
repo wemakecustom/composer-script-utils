@@ -52,9 +52,17 @@ class ConfigDir
     public function updateFile($targetDir, $distFile)
     {
         $info = pathinfo($distFile);
+        $extDist = $extTarget = $info['extension'];
         $targetFile = $targetDir . '/' . $info['basename'];
-        $this->parsers[$info['extension']]->setName(null); // allow name detection
-        $this->parsers[$info['extension']]->updateFile($targetFile, $distFile);
+
+        $targetInfo = pathinfo($info['filename']);
+        if (!empty($targetInfo['extension']) && isset($this->parsers[$targetInfo['extension']])) {
+            $extTarget = $targetInfo['extension'];
+            $targetFile = $targetDir . '/' . $targetInfo['basename'];
+        }
+
+        $this->parsers[$extDist]->setName(null); // allow name detection
+        $this->parsers[$extDist]->updateFile($targetFile, $distFile, $this->parsers[$extTarget]);
     }
 
     public function updateDir($targetDir, $distDir)

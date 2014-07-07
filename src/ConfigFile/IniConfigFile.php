@@ -4,7 +4,7 @@ namespace WMC\Composer\Utils\ConfigFile;
 
 class IniConfigFile extends AbstractConfigFile
 {
-    protected function dump(array $params)
+    public function dump(array $params)
     {
         $ini = "; This file was auto-generated during composer install\n";
 
@@ -15,7 +15,7 @@ class IniConfigFile extends AbstractConfigFile
         return $ini;
     }
 
-    protected function parseFile($file)
+    public function parseFile($file)
     {
         $ini = @parse_ini_file($file, false, INI_SCANNER_RAW);
 

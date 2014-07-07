@@ -60,9 +60,27 @@ You can override this with `setKeepOutdatedParams`.
 
 #### Supported formats
 
-Currently, json, ini, yml and yaml files are supported.
+Currently, json, ini, yml, yaml and php files are supported.
 
 For command-line input, json_decode will be used, but strings do not need to be quoted.
+
+#### Different formats for dist/target files
+
+It is possible to have a dist file in one format and output a target file in another by concatenating the extensions.
+This could be use to generate default values in a PHP script, but still save it as another format.
+
+Ex:
+
+```php
+<?php
+// dist/foo.ini.php
+return array('foo' => 'bar');
+?>
+```
+```ini
+; local/foo.ini
+foo=bar
+```
 
 #### Default Composer script
 

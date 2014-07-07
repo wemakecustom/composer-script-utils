@@ -6,12 +6,12 @@ use Symfony\Component\Yaml\Yaml;
 
 class YamlConfigFile extends AbstractConfigFile
 {
-    protected function dump(array $params)
+    public function dump(array $params)
     {
         return Yaml::dump($params, 3);
     }
 
-    protected function parseFile($file)
+    public function parseFile($file)
     {
         $yaml = Yaml::parse($file);
 

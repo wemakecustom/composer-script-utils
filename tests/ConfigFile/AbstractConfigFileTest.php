@@ -56,24 +56,22 @@ abstract class AbstractConfigFileTest extends \PHPUnit_Framework_TestCase
 
     public function testKeepOutdatedParams()
     {
-        $dump = static::getMethod($this->configFile, "dump");
-        $parse = static::getMethod($this->configFile, "parseFile");
         $tempFile = tempnam(null, 'composer_script_utils_tests');
         $tempDistFile = tempnam(null, 'composer_script_utils_tests');
 
         $data = $this->getTestData();
         $dist = array_slice($data, 0, 2);
 
-        file_put_contents($tempFile, $dump($data));
-        file_put_contents($tempDistFile, $dump($dist));
+        file_put_contents($tempFile, $this->configFile->dump($data));
+        file_put_contents($tempDistFile, $this->configFile->dump($dist));
 
         $this->configFile->setKeepOutdatedParams(true);
         $this->configFile->updateFile($tempFile, $tempDistFile);
-        $this->assertEquals($data, $parse($tempFile));
+        $this->assertEquals($data, $this->configFile->parseFile($tempFile));
 
         $this->configFile->setKeepOutdatedParams(false);
         $this->configFile->updateFile($tempFile, $tempDistFile);
-        $this->assertEquals($dist, $parse($tempFile));
+        $this->assertEquals($dist, $this->configFile->parseFile($tempFile));
 
         unlink($tempFile);
         unlink($tempDistFile);
@@ -91,13 +89,11 @@ abstract class AbstractConfigFileTest extends \PHPUnit_Framework_TestCase
 
     public function testDumpParse()
     {
-        $dump = static::getMethod($this->configFile, "dump");
-        $parse = static::getMethod($this->configFile, "parseFile");
         $tempFile = tempnam(null, 'composer_script_utils_tests');
 
-        file_put_contents($tempFile, $dump($this->getTestData()));
+        file_put_contents($tempFile, $this->configFile->dump($this->getTestData()));
 
-        $this->assertEquals($this->getTestData(), $parse($tempFile));
+        $this->assertEquals($this->getTestData(), $this->configFile->parseFile($tempFile));
 
         unlink($tempFile);
     }
@@ -159,8 +155,7 @@ abstract class AbstractConfigFileTest extends \PHPUnit_Framework_TestCase
         $tempFile = tempnam(null, 'composer_script_utils_tests');
         $tempDistFile = tempnam(null, 'composer_script_utils_tests');
 
-        $dump = static::getMethod($this->configFile, "dump");
-        file_put_contents($tempDistFile, $dump($this->getTestData()));
+        file_put_contents($tempDistFile, $this->configFile->dump($this->getTestData()));
 
         $this->configFile->updateFile($tempFile, $tempDistFile);
 

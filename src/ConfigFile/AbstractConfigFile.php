@@ -36,14 +36,25 @@ abstract class AbstractConfigFile
         return true;
     }
 
-    public function updateFile($realFile, $distFile)
+    /**
+     * Updates realFile using values from distFile
+     *
+     * @param  string $realFile
+     * @param  string $distFile
+     * @param  AbstractConfigFile $writer A different format for output
+     */
+    public function updateFile($realFile, $distFile, AbstractConfigFile $writer = null)
     {
         if (!is_file($distFile)) {
             throw new \InvalidArgumentException(sprintf('%s is missing.', $distFile));
         }
 
+        if (null === $writer) {
+            $writer = $this;
+        }
+
         if (null === $this->name) {
-            $this->setName($this->getNameByFile($realFile));
+            $this->setName($writer->getNameByFile($realFile));
         }
 
         $exists = file_exists($realFile);
@@ -54,7 +65,7 @@ abstract class AbstractConfigFile
         // find the actual params
         $actualValues = array();
         if ($exists) {
-            $existingValues = $this->parseFile($realFile);
+            $existingValues = $writer->parseFile($realFile);
             if (!is_array($existingValues)) {
                 // @codeCoverageIgnoreStart
                 throw new \InvalidArgumentException(sprintf('The existing "%s" file does not contain an array', $realFile));
@@ -74,9 +85,9 @@ abstract class AbstractConfigFile
 
         self::overwriteWithEnvValues($actualValues);
         $actualValues = $this->getParams($expectedValues, $actualValues);
-        $contents = $this->dump($actualValues);
+        $contents = $writer->dump($actualValues);
 
-        if (!$exists || $this->dump($existingValues) != $contents) {
+        if (!$exists || $writer->dump($existingValues) != $contents) {
             $directory = dirname($realFile);
             if (!is_dir($directory)) {
                 $this->io->write(sprintf('<info>Creating "%s" directory</info>', $directory));
@@ -94,7 +105,7 @@ abstract class AbstractConfigFile
      * @param  string $file
      * @return array
      */
-    abstract protected function parseFile($file);
+    abstract public function parseFile($file);
 
     /**
      * Convert all params to a string suitable for a file
@@ -102,7 +113,7 @@ abstract class AbstractConfigFile
      * @param  array  $params
      * @return string
      */
-    abstract protected function dump(array $params);
+    abstract public function dump(array $params);
 
     /**
      * Allow overridding of values using environment values
