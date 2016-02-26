@@ -13,7 +13,7 @@ class YamlConfigFile extends AbstractConfigFile
 
     public function parseFile($file)
     {
-        $yaml = Yaml::parse($file);
+        $yaml = Yaml::parse(file_get_contents($file));
 
         return $yaml === null ? array() : $yaml;
     }
