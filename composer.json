@@ -8,6 +8,10 @@
         {
             "name": "Sébastien Lavoie",
             "email": "seb@wemakecustom.com"
+        },
+        {
+            "name": "Mathieu Lemoine",
+            "email": "mathieu@wemakecustom.com"
         }
     ],
     "autoload": {
