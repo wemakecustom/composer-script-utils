@@ -13,7 +13,7 @@ class JsonParser implements ParserInterface
     {
         $json = json_decode($content, true);
 
-        return $json === null ? [] : $json;
+        return $json === null ? array() : $json;
     }
 
     public static function isSupported()

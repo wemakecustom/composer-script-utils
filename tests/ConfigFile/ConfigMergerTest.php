@@ -14,28 +14,28 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->io = $this->getMock(NullIO::class, ['ask', 'isInteractive']);
+        $this->io = $this->getMock('Composer\IO\NullIO', array('ask', 'isInteractive'));
         $this->cm = new ConfigMerger($this->io);
     }
 
     public function testExpectedParamsArePresent()
     {
-        $expected = [
+        $expected = array(
             'expected' => 'foo',
-        ];
+        );
 
-        $params = $this->cm->updateParams($expected, []);
+        $params = $this->cm->updateParams($expected, array());
 
         $this->assertSame(array_keys($expected), array_keys($params));
     }
 
     public function testRemoveOutdatedParams()
     {
-        $expected = [
+        $expected = array(
             'expected' => 'foo',
-        ];
+        );
 
-        $params = $this->cm->updateParams($expected, ['outdated' => 'bar']);
+        $params = $this->cm->updateParams($expected, array('outdated' => 'bar'));
 
         $this->assertSame(array_keys($expected), array_keys($params));
     }
@@ -43,13 +43,13 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
     public function testDefaultValues()
     {
         // Make sure the env map does not get in the way
-        $this->cm->setEnvMap([]);
+        $this->cm->setEnvMap(array());
 
-        $expected = [
+        $expected = array(
             'expected' => uniqid(),
-        ];
+        );
 
-        $params = $this->cm->updateParams($expected, []);
+        $params = $this->cm->updateParams($expected, array());
 
         $this->assertSame($expected, $params);
     }
@@ -57,11 +57,11 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
     public function testCurrentValuesKept()
     {
         // Make sure the env map does not get in the way
-        $this->cm->setEnvMap([]);
+        $this->cm->setEnvMap(array());
 
-        $expected = [
+        $expected = array(
             'expected-key' => 'expected-value',
-        ];
+        );
 
         $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), $expected);
 
@@ -70,13 +70,13 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
 
     public function testKeepOutdatedParams()
     {
-        $config = [
+        $config = array(
             'expected' => 'foo',
-        ];
+        );
 
-        $currentConfig = [
+        $currentConfig = array(
             'outdated' => 'bar',
-        ];
+        );
 
         $expected = $config + $currentConfig;
         ksort($expected);
@@ -90,85 +90,89 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
 
     public function testImplicitEnvMap()
     {
-        $expected = [
+        $expected = array(
             'foo' => 'expected-value-'.uniqid(),
-        ];
+        );
 
         // Setup environment
-        array_walk($expected, function($value, $key) {
+        $that = $this;
+        array_walk($expected, function($value, $key) use ($that) {
             putenv(strtoupper($key).'='.$value);
-            $this->assertSame(getenv(strtoupper($key)), $value);
+            $that->assertSame(getenv(strtoupper($key)), $value);
         });
 
         $this->cm->setEnvMap(null);
-        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), []);
+        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), array());
         $this->assertSame($expected, $params);
     }
 
     public function testImplicitEnvMapWithCustomName()
     {
-        $expected = [
+        $expected = array(
             'foo' => 'expected-value-'.uniqid(),
-        ];
+        );
 
         // Setup environment
-        array_walk($expected, function($value, $key) {
+        $that = $this;
+        array_walk($expected, function($value, $key) use ($that) {
             putenv('NAME_'.strtoupper($key).'='.$value);
-            $this->assertSame(getenv('NAME_'.strtoupper($key)), $value);
+            $that->assertSame(getenv('NAME_'.strtoupper($key)), $value);
         });
 
         $this->cm->setEnvMap(null);
         $this->cm->setName('name');
 
-        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), []);
+        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), array());
         $this->assertSame($expected, $params);
     }
 
     public function testExplicitEnvMap()
     {
-        $expected = [
+        $expected = array(
             'foo' => uniqid(),
-        ];
+        );
 
         // Setup environment and generate env map
-        $envMap = [];
-        array_walk($expected, function($value, $key) use (&$envMap) {
+        $that = $this;
+        $envMap = array();
+        array_walk($expected, function($value, $key) use (&$envMap, $that) {
             $envKey = $envMap[$key] = uniqid();
             putenv($envKey.'='.$value);
-            $this->assertSame(getenv($envKey), $value);
+            $that->assertSame(getenv($envKey), $value);
         });
 
         $this->cm->setEnvMap($envMap);
 
-        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), []);
+        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), array());
         $this->assertSame($params, $expected);
     }
 
     public function testEnvMapWithCustomName()
     {
-        $expected = [
+        $expected = array(
             'foo' => uniqid(),
-        ];
+        );
 
         // Setup environment and generate env map
-        $envMap = [];
-        array_walk($expected, function($value, $key) use (&$envMap) {
+        $that = $this;
+        $envMap = array();
+        array_walk($expected, function($value, $key) use (&$envMap, $that) {
             $envKey = $envMap[$key] = uniqid();
             putenv($envKey.'='.$value);
-            $this->assertSame(getenv($envKey), $value);
+            $that->assertSame(getenv($envKey), $value);
         });
 
         $this->cm->setEnvMap($envMap);
         $this->cm->setName('name');
         
-        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), []);
+        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), array());
         $this->assertSame($params, $expected);
     }
 
     public function testInteractiveIO()
     {
         // Ensures no implicit Env Map is used
-        $this->cm->setEnvMap([]);
+        $this->cm->setEnvMap(array());
 
         // Enable interactive IO
         $this->io->expects($this->any())
@@ -176,31 +180,32 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
              ->willReturn(true)
                  ;
 
-        $expected = [
+        $expected = array(
             'expected-key-'.uniqid() => 'foo',
-        ];
+        );
 
-        $askedConfigs = [];
+        $askedConfigs = array();
 
+        $that = $this;
         $this->io->expects($this->any())
              ->method('ask')
-             ->will($this->returnCallback(function ($question, $default) use ($expected, &$askedConfigs) {
+             ->will($this->returnCallback(function ($question, $default) use ($expected, &$askedConfigs, $that) {
                  foreach ($expected as $key => $value) {
                      if (false !== strpos($question, $key)) {
-                         $this->assertArrayNotHasKey($key, $askedConfigs, $key.' has been asked for twice.');
+                         $that->assertArrayNotHasKey($key, $askedConfigs, $key.' has been asked for twice.');
                          $askedConfigs[$key] = true;
                          return $default;
                      }
                  }
 
-                 $this->assertTrue(false, sprintf(
+                 $that->assertTrue(false, sprintf(
                      'Unable to find the config associated to the question "%s". Available configs: "%s".',
                      $question,
                      implode('", "', array_keys($expected))
                  ));
              }));
 
-        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), []);
+        $params = $this->cm->updateParams(array_map(function() { return uniqid(); }, $expected), array());
         $this->assertSame(array_keys($expected), array_keys($params));
 
         foreach (array_keys(array_diff_key($expected, $askedConfigs)) as $key) {
@@ -210,22 +215,22 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
 
     public function protectingInteractiveProvider()
     {
-        return [
-            ['string',  'foo', '"foo"'],
-            ['true',    true,  'true'],
-            ['false',   false, 'false'],
-            ['null',    null,  'null'],
-            ['integer', 123,   '123'],
-            ['float',   12.3,  '12.3'],
-            ['empty',   '',    '""'],
-        ];
+        return array(
+            array('string',  'foo', '"foo"'),
+            array('true',    true,  'true'),
+            array('false',   false, 'false'),
+            array('null',    null,  'null'),
+            array('integer', 123,   '123'),
+            array('float',   12.3,  '12.3'),
+            array('empty',   '',    '""'),
+        );
     }
 
     public function parsingInteractiveProvider()
     {
         $data = $this->protectingInteractiveProvider();
-        $data[] = ['string', 'foo', 'foo'];
-        $data[] = ['null',   null,  ''];
+        $data[] = array('string', 'foo', 'foo');
+        $data[] = array('null',   null,  '');
 
         return $data;
     }
@@ -236,7 +241,7 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
     public function testParsingInteractiveInput($name, $parsed, $input)
     {
         // Ensures no implicit Env Map is used
-        $this->cm->setEnvMap([]);
+        $this->cm->setEnvMap(array());
         
         // Enable interactive IO
         $this->io->expects($this->any())
@@ -251,14 +256,14 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
              }));
 
 
-        $params = $this->cm->updateParams([$name => uniqid()], []);
-        $this->assertSame([$name => $parsed], $params);
+        $params = $this->cm->updateParams(array($name => uniqid()), array());
+        $this->assertSame(array($name => $parsed), $params);
     }
 
     public function testDefaultValueUsedForInteractive()
     {
         // Ensures no implicit Env Map is used
-        $this->cm->setEnvMap([]);
+        $this->cm->setEnvMap(array());
 
         // Enable interactive IO
         $this->io->expects($this->any())
@@ -268,14 +273,16 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
 
         $defaultValue = uniqid();
 
+        $that = $this;
+        $cm = $this->cm;
         $this->io->expects($this->once())
              ->method('ask')
-             ->will($this->returnCallback(function ($question, $default) use ($defaultValue) {
-                 $this->assertSame($this->cm->convertValueToInteractiveString($defaultValue), $default);
+             ->will($this->returnCallback(function ($question, $default) use ($defaultValue, $that, $cm) {
+                 $that->assertSame($cm->convertValueToInteractiveString($defaultValue), $default);
                  return $default;
              }));
 
-        $this->cm->updateParams(['foo' => $defaultValue], []);
+        $this->cm->updateParams(array('foo' => $defaultValue), array());
     }
 
     /**
@@ -284,7 +291,7 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
     public function testProtectingInteractiveInputDefault($name, $parsed, $expectedDefault)
     {
         // Ensures no implicit Env Map is used
-        $this->cm->setEnvMap([]);
+        $this->cm->setEnvMap(array());
         
         // Enable interactive IO
         $this->io->expects($this->any())
@@ -292,14 +299,15 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
              ->willReturn(true)
                  ;
 
+        $that = $this;
         $this->io->expects($this->once())
              ->method('ask')
-             ->will($this->returnCallback(function ($question, $default) use ($name, $expectedDefault) {
-                 $this->assertSame($expectedDefault, $default);
+             ->will($this->returnCallback(function ($question, $default) use ($name, $expectedDefault, $that) {
+                 $that->assertSame($expectedDefault, $default);
                  return $default;
              }));
 
-        $this->cm->updateParams([$name => $parsed], []);
+        $this->cm->updateParams(array($name => $parsed), array());
     }
 
     public function testEnvironmentUsedAsDefaultForInteractive()
@@ -311,26 +319,28 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
                  ;
 
         $envKey = uniqid();
-        $this->cm->setEnvMap(['foo' => $envKey]);
+        $this->cm->setEnvMap(array('foo' => $envKey));
 
         $defaultValue = uniqid();
         putenv($envKey.'='.$defaultValue);
         $this->assertSame(getenv($envKey), $defaultValue);
 
+        $that = $this;
+        $cm = $this->cm;
         $this->io->expects($this->once())
              ->method('ask')
-             ->will($this->returnCallback(function ($question, $default) use ($defaultValue) {
-                 $this->assertSame($this->cm->convertValueToInteractiveString($defaultValue), $default);
+             ->will($this->returnCallback(function ($question, $default) use ($defaultValue, $that, $cm) {
+                 $that->assertSame($cm->convertValueToInteractiveString($defaultValue), $default);
                  return $default;
              }));
 
-        $this->cm->updateParams(['foo' => uniqid()], []);
+        $this->cm->updateParams(array('foo' => uniqid()), array());
     }
     
     public function testCurrentValuesNotAskedForInteractive()
     {
         // Ensures no implicit Env Map is used
-        $this->cm->setEnvMap([]);
+        $this->cm->setEnvMap(array());
         
         // Enable interactive IO
         $this->io->expects($this->any())
@@ -343,7 +353,7 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
         $this->io->expects($this->never())
              ->method('ask');
 
-        $config = ['foo' => 'bar'];
+        $config = array('foo' => 'bar');
         $this->cm->updateParams($config, $config);
     }
 }
