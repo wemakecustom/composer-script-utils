@@ -6,12 +6,26 @@ use WMC\Composer\Utils\Filesystem\PathUtil;
 
 class PathUtilTest extends \PHPUnit_Framework_TestCase
 {
-    public function testRelativePath()
+    public function relativePathsProvider()
     {
-        $this->assertEquals(basename(__FILE__),               PathUtil::getRelativePath(__DIR__, __FILE__));
-        $this->assertEquals('',                               PathUtil::getRelativePath(__FILE__, __DIR__));
-        $this->assertEquals('../',                            PathUtil::getRelativePath(__DIR__, dirname(__DIR__)));
-        $this->assertEquals('../Filesystem/PathUtilTest.php', PathUtil::getRelativePath(__DIR__ . '/../ConfigFile', __FILE__));
+        return [
+            [basename(__FILE__),               __DIR__                   , __FILE__        ],
+            ['',                               __FILE__                  , __DIR__         ],
+            ['../',                            __DIR__                   , dirname(__DIR__)],
+            ['../Filesystem/PathUtilTest.php', __DIR__ . '/../ConfigFile', __FILE__        ],
+        ];
+    }
+
+    /**
+     * @dataProvider relativePathsProvider
+     */
+    public function testRelativePath($expected, $from, $to)
+    {
+        $this->assertEquals($expected, PathUtil::getRelativePath($from, $to));
+    }
+    
+    public function testNonRelativePaths()
+    {
         $this->assertFalse(PathUtil::getRelativePath('/sdfhjsklfjhskjdf', '/hkajsdhkajsdha'));
     }
 }
