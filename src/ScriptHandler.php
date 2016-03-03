@@ -4,7 +4,6 @@ namespace WMC\Composer\Utils;
 
 use Composer\Script\Event;
 use Composer\IO\IOInterface;
-use Symfony\Component\Filesystem\Filesystem;
 
 use WMC\Composer\Utils\ConfigFile;
 
