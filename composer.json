@@ -31,6 +31,9 @@
     "extra": {
         "update-config-dirs": {
             "confs/dist": "confs"
+        },
+        "branch-alias": {
+            "dev-master": "2.0-dev"
         }
     }
 }
