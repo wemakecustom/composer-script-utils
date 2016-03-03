@@ -1,21 +1,21 @@
 <?php
 
-namespace WMC\Composer\Utils\ConfigFile;
+namespace WMC\Composer\Utils\ConfigFile\Parser;
 
 use Symfony\Component\Yaml\Yaml;
 
-class YamlConfigFile extends AbstractConfigFile
+class YamlParser implements ParserInterface
 {
     public function dump(array $params)
     {
         return Yaml::dump($params, 3);
     }
 
-    public function parseFile($file)
+    public function parse($content)
     {
-        $yaml = Yaml::parse(file_get_contents($file));
+        $yaml = Yaml::parse($content);
 
-        return $yaml === null ? array() : $yaml;
+        return $yaml === null ? [] : $yaml;
     }
 
     public static function isSupported()

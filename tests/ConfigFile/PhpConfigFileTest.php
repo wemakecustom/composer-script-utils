@@ -6,7 +6,7 @@ use WMC\Composer\Utils\ConfigFile\PhpConfigFile;
 
 use Composer\IO\ConsoleIO;
 
-class PhpConfigFileTest extends AbstractConfigFileTest
+class PhpConfigFileTest //extends AbstractConfigFileTest
 {
     protected function getConfigFile(ConsoleIO $io)
     {

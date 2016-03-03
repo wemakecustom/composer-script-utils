@@ -11,21 +11,27 @@
         }
     ],
     "autoload": {
-        "psr-4": { "WMC\\Composer\\Utils\\Tests\\": "tests" },
-        "psr-4": { "WMC\\Composer\\Utils\\": "src" }
+        "psr-4": {
+            "WMC\\Composer\\Utils\\": "src",
+            "WMC\\Composer\\Utils\\Test\\": "test"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": { "WMC\\Composer\\Utils\\Tests\\": "tests" }
     },
     "require-dev": {
-        "composer/composer": "dev-master"
+        "composer/composer": "dev-master",
+        "knplabs/gaufrette": "^0.2.1"
     },
     "suggest": {
         "symfony/yaml": "Enables yaml parsing"
     },
     "scripts": {
         "post-install-cmd": [
-            "WMC\\Composer\\Utils\\ConfigFile\\ConfigDir::updateDirs"
+            "WMC\\Composer\\Utils\\ScriptHandler::updateDirs"
         ],
         "post-update-cmd": [
-            "WMC\\Composer\\Utils\\ConfigFile\\ConfigDir::updateDirs"
+            "WMC\\Composer\\Utils\\ScriptHandler::updateDirs"
         ]
     },
     "extra": {
