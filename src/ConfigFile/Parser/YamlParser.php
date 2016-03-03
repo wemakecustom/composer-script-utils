@@ -15,7 +15,7 @@ class YamlParser implements ParserInterface
     {
         $yaml = Yaml::parse($content);
 
-        return $yaml === null ? [] : $yaml;
+        return $yaml === null ? array() : $yaml;
     }
 
     public static function isSupported()

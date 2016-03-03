@@ -43,7 +43,7 @@ class ConfigMerger
      * @param array $expected A FLAT array of expected values
      * @param array $current  A FLAT array of current  values
      */
-    public function updateParams(array $expected, array $current = [])
+    public function updateParams(array $expected, array $current = array())
     {
         if (!$this->keepOutdatedParams) {
             // Remove outdated params
@@ -199,9 +199,17 @@ class ConfigMerger
      */
     public function convertInteractiveStringToValue($string)
     {
-        assert('is_string($string)', gettype($string).' given');
+        if (PHP_VERSION_ID < 50408) {
+            assert('is_string($string)');
+        } else {
+            assert('is_string($string)', gettype($string).' given');
+        }
 
-        $value = json_decode($string, true, 1, JSON_BIGINT_AS_STRING);
+        if (PHP_VERSION_ID < 50400) {
+            $value = json_decode($string, true, 1);
+        } else {
+            $value = json_decode($string, true, 1, JSON_BIGINT_AS_STRING);
+        }
 
         return JSON_ERROR_NONE !== json_last_error()
             ? $string

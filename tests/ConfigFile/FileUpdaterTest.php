@@ -37,8 +37,8 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
         $FSmap->set('dist', $distFS);
         $FSmap->set('local', $targetFS);
 
-        $this->setFiles('dist',  []);
-        $this->setFiles('local', []);
+        $this->setFiles('dist',  array());
+        $this->setFiles('local', array());
         
         $this->distDir = 'gaufrette://dist/dir';
         $this->localDir = 'gaufrette://local/dir';
@@ -53,15 +53,13 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
 
     protected function listFiles($key)
     {
-        return array_map(
-            function($key) { return substr($key, 4); },
-            StreamWrapper::getFilesystemMap()->get($key)->listKeys('dir/')['keys']
-        );
+        $keys = StreamWrapper::getFilesystemMap()->get($key)->listKeys('dir/');
+        return array_map(function($key) { return substr($key, 4); }, $keys['keys']);
     }
 
     protected function setFiles($key, $files)
     {
-        $filesInDir = ['dir' => null, 'dir/' => null];
+        $filesInDir = array('dir' => null, 'dir/' => null);
 
         foreach ($files as $file => $content) {
             $filesInDir['dir/'.$file] = $content;
@@ -72,7 +70,7 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->cm = $this->getMock(ConfigMerger::class, ['setName', 'updateParams'], [new NullIO]);
+        $this->cm = $this->getMock('WMC\Composer\Utils\ConfigFile\ConfigMerger', array('setName', 'updateParams'), array(new NullIO));
 
         $this->cm->expects($this->any())
              ->method('updateParams')
@@ -88,13 +86,13 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
         $distFile   = $this->distDir.'/'.$filename;
         $targetFile = $this->localDir.'/'.$filename;
 
-        $this->setFiles('dist', [basename($distFile) => '']);
+        $this->setFiles('dist', array(basename($distFile) => ''));
 
-        $parser = $this->getMock(ParserInterface::class);
+        $parser = $this->getMock('WMC\Composer\Utils\ConfigFile\Parser\ParserInterface');
 
         $parser->expects($this->atLeastOnce())
                ->method('parse')
-               ->willReturn(['foo' => 'bar']);
+               ->willReturn(array('foo' => 'bar'));
 
         $parser->expects($this->atLeastOnce())
                ->method('dump')
@@ -102,7 +100,7 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
 
         $this->fu->addParser(pathinfo($distFile, PATHINFO_EXTENSION), $parser);
 
-        return [$distFile, $targetFile];
+        return array($distFile, $targetFile);
     }
     
     protected function setUpTestConvertFormat($distFile = 'test.from', $localFile = 'test.to')
@@ -110,20 +108,20 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
         $distFile   = $this->distDir.'/'.$distFile;
         $localFile  = $this->localDir.'/'.$localFile;
 
-        $this->setFiles('dist', [basename($distFile) => '']);
+        $this->setFiles('dist', array(basename($distFile) => ''));
 
-        $parser = $this->getMock(ParserInterface::class);
+        $parser = $this->getMock('WMC\Composer\Utils\ConfigFile\Parser\ParserInterface');
 
         $parser->expects($this->atLeastOnce())
                ->method('parse')
-               ->willReturn(['foo' => 'bar']);
+               ->willReturn(array('foo' => 'bar'));
 
         $parser->expects($this->never())
                ->method('dump');
 
         $this->fu->addParser(pathinfo($distFile, PATHINFO_EXTENSION), $parser);
 
-        $parser = $this->getMock(ParserInterface::class);
+        $parser = $this->getMock('WMC\Composer\Utils\ConfigFile\Parser\ParserInterface');
 
         $parser->expects($this->never())
                ->method('parseFile');
@@ -134,7 +132,7 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
 
         $this->fu->addParser(pathinfo($localFile, PATHINFO_EXTENSION), $parser);
 
-        return [$distFile, $localFile];
+        return array($distFile, $localFile);
     }
 
     /**
@@ -145,10 +143,10 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
     {
         $distFile = $this->distDir.'/foo.404';
 
-        $this->setFiles('dist', [basename($distFile) => '']);
+        $this->setFiles('dist', array(basename($distFile) => ''));
         
         $this->fu
-             ->addParser('here', $this->getMock(ParserInterface::class))
+             ->addParser('here', $this->getMock('WMC\Composer\Utils\ConfigFile\Parser\ParserInterface'))
              ->updateFile($this->localDir.'/foo.here', $distFile);
     }
 
@@ -160,10 +158,10 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
     {
         $distFile = $this->distDir.'/foo.here';
 
-        $this->setFiles('dist', [basename($distFile) => '']);
+        $this->setFiles('dist', array(basename($distFile) => ''));
         
         $this->fu
-             ->addParser('here', $this->getMock(ParserInterface::class))
+             ->addParser('here', $this->getMock('WMC\Composer\Utils\ConfigFile\Parser\ParserInterface'))
              ->updateFile($this->localDir.'/foo.404', $distFile);
     }
 
@@ -175,10 +173,10 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
     {
         $distFile = $this->distDir.'/404.404';
 
-        $this->setFiles('dist', []);
+        $this->setFiles('dist', array());
 
         $this->fu
-             ->addParser('404', $this->getMock(ParserInterface::class))
+             ->addParser('404', $this->getMock('WMC\Composer\Utils\ConfigFile\Parser\ParserInterface'))
              ->updateFile($this->localDir.'/foo.404', $distFile);
     }
 
@@ -196,7 +194,7 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
     {
         list($distFile, $targetFile) = $this->setUpTestSameParser();
 
-        $this->setFiles('local', [basename($targetFile) => '']);
+        $this->setFiles('local', array(basename($targetFile) => ''));
 
         $this->assertSame('', file_get_contents($targetFile));
         $this->fu->updateFile($targetFile, $distFile);
@@ -215,11 +213,11 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
     public function testDirSkipFilesWithoutParsers()
     {
         $this->fu
-             ->addParser('NO FILE WITH THIS EXTENSION', $this->getMock(ParserInterface::class))
+             ->addParser('NO FILE WITH THIS EXTENSION', $this->getMock('WMC\Composer\Utils\ConfigFile\Parser\ParserInterface'))
              ->updateDir($this->localDir, FIXTURE_DIR);
 
         foreach ($this->listFiles('local') as $file) {
-            $this->assertContains($file, ['.', '..']);
+            $this->assertContains($file, array('.', '..'));
         }
     }
 
@@ -251,7 +249,7 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
     {
         list($distFile, $targetFile) = $this->setUpTestSameParser();
 
-        $this->setFiles('local', [basename($targetFile) => '']);
+        $this->setFiles('local', array(basename($targetFile) => ''));
 
         $this->assertSame('', file_get_contents($targetFile));
         $this->fu->updateDir($this->localDir, FIXTURE_DIR);

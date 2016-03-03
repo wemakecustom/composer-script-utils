@@ -8,12 +8,12 @@ class PathUtilTest extends \PHPUnit_Framework_TestCase
 {
     public function relativePathsProvider()
     {
-        return [
-            [basename(__FILE__),               __DIR__                   , __FILE__        ],
-            ['',                               __FILE__                  , __DIR__         ],
-            ['../',                            __DIR__                   , dirname(__DIR__)],
-            ['../Filesystem/PathUtilTest.php', __DIR__ . '/../ConfigFile', __FILE__        ],
-        ];
+        return array(
+            array(basename(__FILE__),               __DIR__                   , __FILE__        ),
+            array('',                               __FILE__                  , __DIR__         ),
+            array('../',                            __DIR__                   , dirname(__DIR__)),
+            array('../Filesystem/PathUtilTest.php', __DIR__ . '/../ConfigFile', __FILE__        ),
+        );
     }
 
     /**

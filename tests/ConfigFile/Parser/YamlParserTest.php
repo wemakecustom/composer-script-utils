@@ -18,8 +18,8 @@ class YamlParserTest extends AbstractParserTest
 
     public function dataProvider()
     {
-        return [
-            [ <<<'EOF'
+        return array(
+            array( <<<'EOF'
 parameters:
     string: foo
     btrue: true
@@ -30,7 +30,7 @@ parameters:
     empty: ''
 
 EOF
-            , ['parameters' => [
+            , array('parameters' => array(
                 'string'  => 'foo',
                 'btrue'   => true,
                 'bfalse'  => false,
@@ -38,7 +38,7 @@ EOF
                 'integer' => 123,
                 'float'   => 12.3,
                 'empty'   => '',
-            ]]],
-        ];
+            ))),
+        );
     }
 }

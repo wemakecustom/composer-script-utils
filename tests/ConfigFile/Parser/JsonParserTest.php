@@ -18,8 +18,8 @@ class JsonParserTest extends AbstractParserTest
 
     public function dataProvider()
     {
-        return [
-            [ '{"string":"foo","btrue":true,"bfalse":false,"nnull":null,"integer":123,"float":12.3,"empty":""}', [
+        return array(
+            array( '{"string":"foo","btrue":true,"bfalse":false,"nnull":null,"integer":123,"float":12.3,"empty":""}', array(
                 'string'  => 'foo',
                 'btrue'   => true,
                 'bfalse'  => false,
@@ -27,7 +27,7 @@ class JsonParserTest extends AbstractParserTest
                 'integer' => 123,
                 'float'   => 12.3,
                 'empty'   => '',
-            ]],
-        ];
+            )),
+        );
     }
 }

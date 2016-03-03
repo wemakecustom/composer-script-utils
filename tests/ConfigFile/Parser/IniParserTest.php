@@ -18,8 +18,8 @@ class IniParserTest extends AbstractParserTest
 
     public function dataProvider()
     {
-        return [
-            [ <<<'EOF'
+        return array(
+            array( <<<'EOF'
 ; This file was auto-generated during composer install
 string=foo
 btrue=true
@@ -29,7 +29,7 @@ integer=123
 float=12.3
 empty=
 EOF
-            , [
+            , array(
                 'string'  => 'foo',
                 'btrue'   => true,
                 'bfalse'  => false,
@@ -37,7 +37,7 @@ EOF
                 'integer' => 123,
                 'float'   => 12.3,
                 'empty'   => '',
-            ]],
-        ];
+            )),
+        );
     }
 }
