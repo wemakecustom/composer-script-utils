@@ -211,7 +211,7 @@ class ConfigMerger
             $value = json_decode($string, true, 1, JSON_BIGINT_AS_STRING);
         }
 
-        return JSON_ERROR_NONE !== json_last_error()
+        return JSON_ERROR_NONE !== json_last_error() && '' !== $string
             ? $string
             : $value;
     }
