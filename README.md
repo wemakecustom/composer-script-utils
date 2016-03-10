@@ -60,7 +60,7 @@ You can override this with `setKeepOutdatedParams`.
 
 #### Supported formats
 
-Currently, json, ini, yml, yaml and php files are supported.
+Currently, json, ini, yml and yaml files are supported.
 
 For command-line input, json_decode will be used, but strings do not need to be quoted.
 
@@ -92,10 +92,10 @@ Each file in `path/to/dist/dir` will be compiled to `path/to/target/dir`.
 {
     "scripts": {
         "post-install-cmd": [
-            "WMC\\Composer\\Utils\\ConfigFile\\ConfigDir::updateDirs"
+            "WMC\\Composer\\Utils\\ScriptHandler::updateDirs"
         ],
         "post-update-cmd": [
-            "WMC\\Composer\\Utils\\ConfigFile\\ConfigDir::updateDirs"
+            "WMC\\Composer\\Utils\\ScriptHandler::updateDirs"
         ]
     },
     "extra": {
@@ -108,28 +108,34 @@ Each file in `path/to/dist/dir` will be compiled to `path/to/target/dir`.
 
 #### Custom handling
 
-For more control, use the ConfigFile directly:
+For more control, use the FileUpdater directly:
 
 ```php
 <?php
 use Composer\Script\Event;
-use WMC\Composer\Utils\ConfigFile\IniConfigFile;
+use WMC\Composer\Utils\ScriptHandler as Base;
 
 class ScriptHandler
 {
     public static function myHandler(Event $event)
     {
-        $configFile = new IniConfigFile($event->getIO());
-        $configFile->updateFile('database.ini', 'database.dist.ini');
+        $configFile = Base::createConfigFileUpdate($event->getIO());
+        $configFile->updateFile('database.ini', 'database.ini.dist');
     }
 }
 ?>
 ```
 
+N.B.: If you want to save your dist files along with your targets (For example,
+a `parameters.yml.dist` with the `parameters.yml`), you will need to use Custom
+Handling.
+
+
 ## Author
 
  * [Sébastien Lavoie](http://www.wemakecustom.com)
+ * [Mathieu Lemoine](http://www.wemakecustom.com)
 
 ## Notes
 
-Should work with PHP 5.3 but tests require 5.4 +
+Tested on PHP 5.3+
