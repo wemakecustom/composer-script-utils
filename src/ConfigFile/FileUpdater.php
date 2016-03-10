@@ -6,6 +6,8 @@ use WMC\Composer\Utils\ConfigFile\Parser\ParserInterface;
 
 class FileUpdater
 {
+    const DIST_EXTENSION = 'dist';
+    
     /**
      * @var ParserInterface[]
      */
@@ -23,6 +25,10 @@ class FileUpdater
 
     public function addParser($extension, ParserInterface $parser)
     {
+        if (static::DIST_EXTENSION === $extension) {
+            throw new \InvalidArgumentException(sprintf('Cannot register a parser for extension %s', $extension));
+        }
+
         $this->parsers[$extension] = $parser;
 
         return $this;
@@ -47,13 +53,16 @@ class FileUpdater
 
         if (0 === $count) {
             throw new \RangeException('No parser loaded');
-        } elseif (1 === $count) {
-            $glob = '*.'.$extensions[0];
-        } else {
-            $glob = '*.{'.implode(',', $extensions).'}';
         }
 
-        return glob($dir.DIRECTORY_SEPARATOR.$glob, GLOB_BRACE);
+        $extensions = 1 === $count ? $extensions[0] : '{'.implode(',', $extensions).'}';
+
+        return glob(sprintf(
+            '%s*.%s{,.%s}',
+            rtrim($dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR,
+            $extensions,
+            static::DIST_EXTENSION
+        ), GLOB_BRACE);
     }
 
     /**
@@ -61,7 +70,12 @@ class FileUpdater
      */
     public function updateFile($targetFile, $distFile)
     {
-        $distExtension = pathinfo($distFile, PATHINFO_EXTENSION);
+        $info = pathinfo($distFile);
+        $distExtension = $info['extension'];
+        if (static::DIST_EXTENSION === $distExtension) {
+            $distExtension = pathinfo($info['filename'], PATHINFO_EXTENSION);
+        }
+
         if (!isset($this->parsers[$distExtension])) {
             throw new \DomainException(sprintf('No parser associated to extension "%s"', $distExtension));
         }
@@ -99,11 +113,17 @@ class FileUpdater
         }
     }
 
-    protected function computeTargetFileName($targetDir, $distFile)
+    public function computeTargetFileName($targetDir, $distFile)
     {
-        $info = pathinfo($distFile);
+        $info      = pathinfo($distFile);
         $extension = $info['extension'];
         $name      = $info['filename'];
+
+        if (static::DIST_EXTENSION === $extension) {
+            $info      = pathinfo($name);
+            $extension = $info['extension'];
+            $name      = $info['filename'];
+        }
 
         $info = pathinfo($name);
         if (!empty($info['extension']) && isset($this->parsers[$info['extension']])) {
@@ -117,6 +137,9 @@ class FileUpdater
     /**
      * Calls updateFile for each file supported in $distDir.
      * Output files in $targetDir.
+     *
+     * $targetDir and $distDir SHOULD be different.
+     * Unless you know what you're doing, undefined behaviors will occur.
      */
     public function updateDir($targetDir, $distDir)
     {
