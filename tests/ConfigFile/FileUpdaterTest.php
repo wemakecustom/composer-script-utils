@@ -109,6 +109,7 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
         $localFile  = $this->localDir.'/'.$localFile;
 
         $this->setFiles('dist', array(basename($distFile) => ''));
+        $this->setFiles('local', array(basename($localFile) => ''));
 
         $parser = $this->getMock('WMC\Composer\Utils\ConfigFile\Parser\ParserInterface');
 
@@ -124,10 +125,12 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
         $parser = $this->getMock('WMC\Composer\Utils\ConfigFile\Parser\ParserInterface');
 
         $parser->expects($this->never())
-               ->method('parseFile');
+               ->method('parse')
+               ->willReturn(array('baz' => 'quux'));
 
         $parser->expects($this->atLeastOnce())
                ->method('dump')
+               ->with(array('foo' => 'bar'))
                ->willReturn('DUMPED');
 
         $this->fu->addParser(pathinfo($localFile, PATHINFO_EXTENSION), $parser);
@@ -186,6 +189,33 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFileNotExists($targetFile);
         $this->fu->updateFile($targetFile, $distFile);
+        $this->assertFileExists($targetFile);
+        $this->assertSame('DUMPED', file_get_contents($targetFile));
+    }
+
+    public function testFileIgnoreDistExtension()
+    {
+        list($distFile, $targetFile) = $this->setUpTestSameParser();
+        $distFile .= '.'.FileUpdater::DIST_EXTENSION;
+
+        $this->setFiles('dist', array(basename($distFile) => ''));
+
+        $this->assertFileNotExists($targetFile);
+        $this->fu->updateFile($targetFile, $distFile);
+        $this->assertFileExists($targetFile);
+        $this->assertSame('DUMPED', file_get_contents($targetFile));
+    }
+
+    public function testFilerConvertFormat()
+    {
+        list($distFile, $targetFile) = $this->setUpTestConvertFormat('test.to.from', 'test.to');
+
+        $this->assertFileNotExists($targetFile.'.dir');
+        $this->assertFileExists($targetFile);
+
+        $this->fu->updateFile($targetFile, $distFile);
+
+        $this->assertFileNotExists($targetFile.'.dir');
         $this->assertFileExists($targetFile);
         $this->assertSame('DUMPED', file_get_contents($targetFile));
     }
@@ -260,12 +290,28 @@ class FileUpdaterTest extends \PHPUnit_Framework_TestCase
     {
         list($distFile, $targetFile) = $this->setUpTestConvertFormat('test.to.from', 'test.to');
 
-        $this->assertFileNotExists($targetFile);
+        $this->assertFileExists($targetFile);
         $this->assertFileNotExists($targetFile.'.dir');
 
         $this->fu->updateDir($this->localDir, FIXTURE_DIR);
 
         $this->assertFileNotExists($targetFile.'.dir');
+        $this->assertFileExists($targetFile);
+        $this->assertSame('DUMPED', file_get_contents($targetFile));
+    }
+
+    public function testDirUpdateDistExtension()
+    {
+        list($distFile, $targetFile) = $this->setUpTestSameParser('test._dir_dist');
+
+        $this->assertFileNotExists(FIXTURE_DIR.basename($distFile));
+
+        $distFile .= '.'.FileUpdater::DIST_EXTENSION;
+
+        $this->assertFileNotExists($targetFile);
+
+        $this->fu->updateDir($this->localDir, FIXTURE_DIR);
+
         $this->assertFileExists($targetFile);
         $this->assertSame('DUMPED', file_get_contents($targetFile));
     }
