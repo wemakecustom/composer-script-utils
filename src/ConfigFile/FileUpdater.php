@@ -57,12 +57,7 @@ class FileUpdater
     }
 
     /**
-     * Update local file associated to $distFile in $targetDir.
-     *
-     * If you want to change the format between input and output,
-     * Use a double extension (For example: file.ini.php)
-     * the trailing extension (php) will be used for input while
-     * the inner extension (ini) will be used for output.
+     * Update $targetFile to be in sync with $distFile.
      */
     public function updateFile($targetFile, $distFile)
     {

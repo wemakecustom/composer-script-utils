@@ -356,4 +356,68 @@ class ConfigMergerTest extends \PHPUnit_Framework_TestCase
         $config = array('foo' => 'bar');
         $this->cm->updateParams($config, $config);
     }
+
+    public function testNonFlatConfig()
+    {
+        // Make sure the env map does not get in the way
+        $this->cm->setEnvMap(array());
+
+
+        $expected = array(
+            'parameters' => array(
+                'expected-1' => 'expected-value',
+                'expected-2' => 'expected-value-2',
+            ),
+            'expected-3' => 'expected-value-3',
+        );
+
+        $current = array(
+            'parameters' => array(
+                'expected-1' => 'expected-value',
+            ),
+        );
+
+        $default = $expected;
+        $default['parameters']['expected-1'] = uniqid();
+
+        $params = $this->cm->updateParams($default, $current);
+        $this->assertSame($expected, $params);
+    }
+
+    public function testNonFlatInteractive()
+    {
+        // Make sure the env map does not get in the way
+        $this->cm->setEnvMap(array());
+
+        // Enable interactive IO
+        $this->io->expects($this->any())
+             ->method('isInteractive')
+             ->willReturn(true)
+                 ;
+
+        $this->io->expects($this->any())
+             ->method('ask')
+             ->will($this->returnArgument(1))
+                 ;
+
+        $expected = array(
+            'parameters' => array(
+                'expected-1' => 'expected-value',
+                'expected-2' => 'expected-value-2',
+            ),
+            'expected-3' => 'expected-value-3',
+        );
+
+        $current = array(
+            'parameters' => array(
+                'expected-1' => 'expected-value',
+            ),
+        );
+
+        $default = $expected;
+        $default['parameters']['expected-1'] = uniqid();
+
+        $params = $this->cm->updateParams($default, $current);
+        $this->assertSame($expected, $params);
+    }
 }
