@@ -40,7 +40,7 @@
     },
     "extra": {
         "update-config-dirs": {
-            "confs/dist": "confs"
+            "samples/dist": "samples"
         },
         "branch-alias": {
             "dev-master": "2.0-dev"
