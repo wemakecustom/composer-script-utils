@@ -1,1 +1,2 @@
-test_yml: This is a test for YAML format
+parameters:
+  test_yml: This is a test for YAML format
