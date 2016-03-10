@@ -7,10 +7,10 @@ interface ParserInterface
     public static function isSupported();
 
     /**
-     * Parse content (in a string) and return a FLAT array of configs.
+     * Parse content (in a string) and return an array of configs.
      *
      * @param string $content
-     * @return array A FLAT array
+     * @return array An array
      */
     public function parse($content);
 

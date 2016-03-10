@@ -40,23 +40,23 @@ class ConfigMerger
      * Variables specified only in $current will be discarded if keepOutdatedParams is not configured, kept as-is otherwise.
      * Variables specified in both $current and $expected will be kept as in $current.
      *
-     * @param array $expected A FLAT array of expected values
-     * @param array $current  A FLAT array of current  values
+     * The processing is done recursively
+     *
+     * @param array $expected An array of expected values
+     * @param array $current  An array of current  values
      */
     public function updateParams(array $expected, array $current = array())
     {
         if (!$this->keepOutdatedParams) {
-            // Remove outdated params
-            $current = array_intersect_key($current, $expected);
+            $current = $this->removeOutdatedParams($current, $expected);
         }
 
-        // Variables requiring processing (Values only in $expected)
-        $missing = array_diff_key($expected, $current);
+        $missing = $this->getMissingVariables($expected, $current);
 
         // Process variables
         $missing = $this->process($missing);
 
-        return $current + $missing;
+        return array_replace_recursive($current, $missing);
     }
 
     protected function process(array $missing)
@@ -67,17 +67,50 @@ class ConfigMerger
         return $missing;
     }
     
+    protected function removeOutdatedParams($current, $expected)
+    {
+        $clean = array_intersect_key($current, $expected);
+
+        foreach ($clean as $k => &$v) {
+            if (is_array($v) && is_array($expected[$k])) {
+                $v = $this->removeOutdatedParams($v, $expected[$k]);
+            }
+        }
+
+        return $clean;
+    }
+
+    protected function getMissingVariables($expected, $current)
+    {
+        $missing = array_diff_key($expected, $current);
+
+        foreach (array_intersect_key($current, $expected) as $key => $value) {
+            if (!is_array($expected[$key])) {
+                continue;
+            }
+
+            $missing[$key] = is_array($value) ? $this->getMissingVariables($expected[$key], $value) : $expected[$key];
+        }
+
+        return $missing;
+    }
+
     /**
      * Variables for which a non-empty environment variable provided,
      * will be replaced.
      *
      * @param array $missing
      */
-    protected function processEnv(array $missing)
+    protected function processEnv(array $missing, $prefix = '')
     {
-        foreach ($this->getEnvMapForParams(array_keys($missing)) as $key => $envKey) {
-            if ($value = getenv($envKey)) {
-                $missing[$key] = $value;
+        foreach ($missing as $key => &$value) {
+            if (is_array($value)) {
+                $value = $this->processEnv($value, $prefix.$key.'.');
+                continue;
+            }
+
+            if ($envValue = $this->getEnvValueFor($prefix.$key)) {
+                $value = $envValue;
             }
         }
 
@@ -91,50 +124,61 @@ class ConfigMerger
      * @param boolean $isStarted Shared state if the header was already outputed.
      * @return array
      */
-    protected function processIO(array $missing)
+    protected function processIO(array $missing, &$isStarted = false, $prefix = '')
     {
         // Simply use the expectedParams value as default for the missing params.
         if (!$this->io->isInteractive()) {
             return $missing;
         }
 
-        $isStarted = false;
-        
         foreach ($missing as $key => $default) {
+            $fqk = $prefix.$key;
+
+            if (is_array($default)) {
+                $missing[$key] = $this->processIO($default, $isStarted, $fqk.'.');
+                continue;
+            }
+
             if (!$isStarted) {
                 $isStarted = true;
                 $this->io->write(sprintf('<comment>Some %s parameters are missing. Please provide them.</comment>', $this->name));
             }
 
-            $default = $this->convertValueToInteractiveString($default);
-            $value = $this->io->ask(sprintf('<question>%s</question> (<comment>%s</comment>): ', $key, $default), $default);
-
-            $missing[$key] = $this->convertInteractiveStringToValue($value);
+            $missing[$key] = $this->askIO($fqk, $default);
         }
 
         return $missing;
     }
 
+    protected function askIO($key, $default)
+    {
+        $default = $this->convertValueToInteractiveString($default);
+        $value = $this->io->ask(sprintf('<question>%s</question> (<comment>%s</comment>): ', $key, $default), $default);
+
+        return $this->convertInteractiveStringToValue($value);
+    }
+
     /**
-     * Get a map of ['param_name' => 'ENV_NAME']
-     *
      * @param  array $missingKeys
      * @return array
      */
-    protected function getEnvMapForParams(array $missingKeys)
+    protected function getEnvValueFor($key)
+    {
+        if (!$envKey = $this->getEnvKeyFor($key)) {
+            return null;
+        }
+
+        return getenv($envKey);
+    }
+
+    protected function getEnvKeyFor($key)
     {
         if (is_array($this->envMap)) {
-            return $this->envMap;
+            return isset($this->envMap[$key]) ? $this->envMap[$key] : null;
         }
 
-        $envMap = array();
-        $prefix = $this->name ? strtoupper($this->name).'_' : '';
-
-        foreach ($missingKeys as $key) {
-            $envMap[$key] = $prefix.strtoupper($key);
-        }
-
-        return $envMap;
+        return ($this->name ? strtoupper($this->name).'_' : '')
+             .strtoupper(str_replace('.', '_', $key));
     }
 
     public function setEnvMap(array $envMap = null)
